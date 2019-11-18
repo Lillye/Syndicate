@@ -7,10 +7,9 @@ namespace Synthesis.Models
 {
     public class News
     {
-        public string Title;
-        public string Summary;
-        public string Date;
-        public string ImageURL;
-        public string URL;
+        public string Title { get; set; }
+        public string Summary { get; set; }
+        public string Date { get; set; }
+        public IEnumerable<Tuple<string,string>> Links { get; set; }
     }
 }
