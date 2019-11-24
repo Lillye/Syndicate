@@ -5,6 +5,7 @@ using System.Net;
 using System.ServiceModel.Syndication;
 using System.Threading.Tasks;
 using System.Xml;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Synthesis.Models;
@@ -19,10 +20,10 @@ namespace Synthesis.Controllers
         public IEnumerable<News> Get()
         {
             var urls = new string[] {
-                @"https://www.geekweek.pl/rss/wszystkie.xml",
-                @"https://physicsworld.com/feed",
+                //@"https://www.geekweek.pl/rss/wszystkie.xml",
+                //@"https://physicsworld.com/feed",
                 @"http://kotaku.com/vip.xml",
-                @"https://www.gamespot.com/feeds/mashup/"
+                //@"https://www.gamespot.com/feeds/mashup/"
             };
             WebClient webClient = new WebClient();
             // webClient.Headers.Add("user-agent", "Chrome/15.0.874.121");
@@ -42,11 +43,40 @@ namespace Synthesis.Controllers
                         Title = item.Title.Text,
                         Summary = item.Summary.Text,
                         Date = item.PublishDate.UtcDateTime.ToShortDateString(),
-                        Links = item.Links.Select(s => Tuple.Create(s.MediaType, s.GetAbsoluteUri()?.ToString()))
+                        Links = item.Links.Select(s => Tuple.Create(s.MediaType, s.GetAbsoluteUri()?.ToString())).ToList()
                     });
+                }
+
+                foreach (var item in newsList)
+                {
+                    var document = new HtmlDocument();
+                    document.LoadHtml(item.Summary);
+                    var imgNodes = document.DocumentNode.SelectNodes("//img");
+                    var pNodes = document.DocumentNode.SelectNodes("//p");
+                    var aNodes = document.DocumentNode.SelectNodes("//a");
+
+                    var content = pNodes?[0].InnerHtml;
+                    var links = aNodes?.Select(p => p.Attributes.Select(a => a.Name));
+                    if (content != null)
+                        item.Summary = content;
+                    if (item.Links.Count() == 0 && aNodes != null)
                 }
             }
             return newsList;
+        }
+
+        private static List<Tuple<string, string>> AcquireLinks(HtmlNodeCollection nodes, string type)
+        {
+            var ret = new List<Tuple<string,string>>();
+            foreach (var node in nodes)
+            {
+                var values = node.Attributes.Where(a => a.Name == type).Select(a => a.Value);
+                foreach (var val in values)
+                {
+                    ret.Add(Tuple.Create(type,val));
+                }
+            }
+            return ret;
         }
     }
 }
