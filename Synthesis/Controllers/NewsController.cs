@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.ServiceModel.Syndication;
+using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
@@ -52,14 +54,29 @@ namespace Synthesis.Controllers
                     var document = new HtmlDocument();
                     document.LoadHtml(item.Summary);
                     var imgNodes = document.DocumentNode.SelectNodes("//img");
-                    var pNodes = document.DocumentNode.SelectNodes("//p");
                     var aNodes = document.DocumentNode.SelectNodes("//a");
+                    if (imgNodes != null)
+                        item.Links.AddRange(AcquireLinks(imgNodes, "src"));
+                    if (aNodes != null)
+                        item.Links.AddRange(AcquireLinks(aNodes, "href"));
 
+                    var pNodes = document.DocumentNode.SelectNodes("//p");
                     var content = pNodes?[0].InnerHtml;
-                    var links = aNodes?.Select(p => p.Attributes.Select(a => a.Name));
                     if (content != null)
-                        item.Summary = content;
-                    if (item.Links.Count() == 0 && aNodes != null)
+                    {
+                        document.LoadHtml(content);
+                        var text = document.DocumentNode.SelectNodes("//text()")?.Select(node => node.InnerText);
+                        if (text != null)
+                        {
+                            StringBuilder output = new StringBuilder();
+                            foreach (string line in text)
+                            {
+                                output.AppendLine(line);
+                            }
+                            content = HttpUtility.HtmlDecode(output.ToString());
+                            item.Summary = content;
+                        }
+                    }
                 }
             }
             return newsList;

@@ -22,8 +22,9 @@ class Grid extends Component {
             <div className="Board">
                 {this.state.news.map(item =>
                     <div className="Unit">
+                        <div><img src={item.links && item.links.find(v => v.item1 == "src").item2}/></div>
                         <h3>{item.title}</h3>
-                        <div dangerouslySetInnerHTML={{ __html: item.summary }}></div>
+                        <div>{item.summary}</div>
                         <div>{item.date}</div>
                         <div>{item.links && item.links.map(link => <div><b>{link.item1}</b> {link.item2}</div>)}</div>
                     </div>)
