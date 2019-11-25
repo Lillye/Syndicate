@@ -22,10 +22,11 @@ class Grid extends Component {
             <div className="Board">
                 {this.state.news.map(item =>
                     <div className="Unit">
-                        <div><img src={item.links && item.links.find(v => v.item1 == "src").item2}/></div>
+                        <div className="ImageContainer"><img className="Image" src={item.links && item.links.find(v => v.item1 == "image").item2}/></div>
                         <h3>{item.title}</h3>
                         <div>{item.summary}</div>
                         <div>{item.date}</div>
+                        <div>Source: {item.links && item.links.find(v => v.item1 == "source").item2}</div>
                         <div>{item.links && item.links.map(link => <div><b>{link.item1}</b> {link.item2}</div>)}</div>
                     </div>)
                  }

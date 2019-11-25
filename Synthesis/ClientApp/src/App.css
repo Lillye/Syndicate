@@ -31,3 +31,16 @@
     margin: 10px;
     text-align: center;
 }
+
+.ImageContainer {
+    width: inherit;
+    height: 250px;
+    overflow: hidden;
+}
+
+.Image {
+    object-fit: cover;
+    height: 100%;
+    width: 100%;
+}
+
